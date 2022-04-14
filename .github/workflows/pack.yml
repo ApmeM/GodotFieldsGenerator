@@ -32,9 +32,17 @@ jobs:
     - name: Setup nuget config
       run: nuget.exe sources add -name github -source "https://nuget.pkg.github.com/apmem/index.json" -username ${{ github.actor }} -password ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Upload to GitHub Packages
+    - name: Upload Attributes to GitHub Packages
       run: |
-           for f in ./GodotAnalysers/GodotAnalysers.Package/bin/Release/*.nupkg
+           for f in ./GodotAnalysers/GodotAnalysersAttribute/bin/Release/*.nupkg
+           do
+             nuget push $f -Source "github"
+           done
+      shell: bash
+
+    - name: Upload Generator to GitHub Packages
+      run: |
+           for f in ./GodotAnalysers/GodotAnalysers/bin/Release/*.nupkg
            do
              nuget push $f -Source "github"
            done

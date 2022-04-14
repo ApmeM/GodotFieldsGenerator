@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <RootNamespace>GodotAnalysers</RootNamespace>
+  </PropertyGroup>
+
+	<PropertyGroup>
+		<PackageId>GodotAnalysersAttribute</PackageId>
+		<PackageVersion>1.0.0.0</PackageVersion>
+		<Authors>ApmeM</Authors>
+		<PackageLicenseUrl>https://github.com/ApmeM/GodotFieldsGenerator/blob/master/LICENSE</PackageLicenseUrl>
+		<PackageProjectUrl>https://github.com/ApmeM/GodotFieldsGenerator/</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/ApmeM/GodotFieldsGenerator/</RepositoryUrl>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<Description>Helper library for classes that us used by GodotAnalysers generator.</Description>
+		<PackageReleaseNotes>First release.</PackageReleaseNotes>
+		<Copyright>(c) 2022 Artem Votincev</Copyright>
+		<PackageTags>GodotAnalysers, analyzers</PackageTags>
+	</PropertyGroup>
+
+</Project>

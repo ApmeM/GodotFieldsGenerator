@@ -1,15 +1,46 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <IsPackable>false</IsPackable>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+		<SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	</PropertyGroup>
 
-    <!-- Avoid ID conflicts with the package project. -->
-    <PackageId>*$(MSBuildProjectFile)*</PackageId>
-  </PropertyGroup>
+	<PropertyGroup>
+		<PackageId>GodotAnalysers</PackageId>
+		<PackageVersion>1.0.0.0</PackageVersion>
+		<Authors>ApmeM</Authors>
+		<PackageLicenseUrl>https://github.com/ApmeM/GodotFieldsGenerator/blob/master/LICENSE</PackageLicenseUrl>
+		<PackageProjectUrl>https://github.com/ApmeM/GodotFieldsGenerator/</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/ApmeM/GodotFieldsGenerator/</RepositoryUrl>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<Description>C# fields generator for godot scenes.</Description>
+		<PackageReleaseNotes>First release.</PackageReleaseNotes>
+		<Copyright>(c) 2022 Artem Votincev</Copyright>
+		<PackageTags>GodotAnalysers, analyzers</PackageTags>
+		<DevelopmentDependency>true</DevelopmentDependency>
+		<NoPackageAnalysis>true</NoPackageAnalysis>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.8.0" />
-  </ItemGroup>
+		<TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\GodotAnalysersAttribute\GodotAnalysersAttribute.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.8.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="tools\*.ps1" CopyToOutputDirectory="Always" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+	<Target Name="_AddAnalyzersToOutput">
+		<ItemGroup>
+			<TfmSpecificPackageFile Include="$(OutputPath)\GodotAnalysers.dll" PackagePath="analyzers/dotnet/cs" />
+		</ItemGroup>
+	</Target>
 
 </Project>
