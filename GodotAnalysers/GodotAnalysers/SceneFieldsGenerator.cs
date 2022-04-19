@@ -29,9 +29,8 @@ namespace GodotAnalysers
 
             foreach (var unit in receiver.Units)
             {
-                var model = context.Compilation.GetSemanticModel(unit.SyntaxTree);
                 var name = Path.GetFileNameWithoutExtension(unit.SyntaxTree.FilePath) + $".Generated.cs";
-                var content = GetSourceContent(unit, model);
+                var content = GetSourceContent(unit);
                 if (content != null)
                 {
                     context.AddSource(name, content.NormalizeWhitespace().ToString());
@@ -39,9 +38,9 @@ namespace GodotAnalysers
             }
         }
 
-        private static CompilationUnitSyntax GetSourceContent(CompilationUnitSyntax unit, SemanticModel model)
+        private static CompilationUnitSyntax GetSourceContent(CompilationUnitSyntax unit)
         {
-            unit = (CompilationUnitSyntax)new AnnotationInitializer(model).Visit(unit);
+            unit = (CompilationUnitSyntax)new AnnotationInitializer().Visit(unit);
             unit = (CompilationUnitSyntax)new PartialClassGenerator().Visit(unit);
             unit = (CompilationUnitSyntax)new PartialClassContentGenerator().Visit(unit);
             if (unit.DescendantNodes().OfType<TypeDeclarationSyntax>().Any()) return unit;
@@ -62,23 +61,18 @@ namespace GodotAnalysers
 
         private class AnnotationInitializer : CSharpSyntaxRewriter
         {
-
-            private SemanticModel Model { get; set; }
-
-            public AnnotationInitializer(SemanticModel model)
-            {
-                Model = model;
-            }
-
             public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
             {
-                var type = Model.GetDeclaredSymbol(node); // Get symbol of ORIGINAL node
-                var members = type.GetAttributes()
-                    .Where(a => a.AttributeClass.Name == SceneReferenceAttributeName)
-                    .Select(a => (string)a.ConstructorArguments.First().Value)
+                var type = node.Identifier.ToFullString();
+                var members = node.AttributeLists
+                    .SelectMany(a => a.Attributes)
+                    .Where(a => a.Name.NormalizeWhitespace().ToFullString() == SceneReferenceAttributeName ||
+                                a.Name.NormalizeWhitespace().ToFullString() + "Attribute" == SceneReferenceAttributeName)
+                    .Select(a => ((LiteralExpressionSyntax)a.ArgumentList.Arguments.First().Expression).Token.ValueText)
                     .ToArray();
+
                 node = (ClassDeclarationSyntax)base.VisitClassDeclaration(node); // Pass ORIGINAL node
-                return node.WithAdditionalAnnotations(GetAnnotations(type.Name, node.SyntaxTree.FilePath, members));
+                return node.WithAdditionalAnnotations(GetAnnotations(type, node.SyntaxTree.FilePath, members));
             }
 
             private static IEnumerable<SyntaxAnnotation> GetAnnotations(string type, string filePath, string[] members)
