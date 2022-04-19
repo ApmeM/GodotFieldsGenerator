@@ -20,7 +20,7 @@ public partial class C { }
             
             var expectedResult = CreateCompilation(@"using GodotAnalysers;
 
-public partial class C
+public partial class C : RigidBody2D
 {
     private Sprite sprite;
     private CollisionShape2D collisionShape2D;

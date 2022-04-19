@@ -127,8 +127,9 @@ namespace GodotAnalysers
 
         private class PartialClassContentGenerator : CSharpSyntaxRewriter
         {
-            private static Regex nodeDefinition = new Regex("\\[node.*name=\"(.*?)\".*parent=\"(.*?)\".*]");
-            private static Regex builtInTypes = new Regex("type=\"(.*?)\"");
+            private static Regex nodeDefinition = new Regex("\\[node.*name=\"(.*?)\".*]");
+            private static Regex builtInTypes = new Regex("type=\"(.*?)\""); 
+            private static Regex parentHierarchy = new Regex("parent=\"(.*?)\"");
             private static Regex instanceTypes = new Regex("instance=");
 
             public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
@@ -151,6 +152,8 @@ namespace GodotAnalysers
                 var memberDeclarationBuilder = new StringBuilder();
                 memberDeclarationBuilder.AppendLine("public void FillMembers() {");
 
+                string baseType = null;
+
                 foreach (var member in members)
                 {
                     var scenePath = Path.Combine(Path.GetDirectoryName(filePath), member);
@@ -160,17 +163,9 @@ namespace GodotAnalysers
                         var nodeDefinitionMatch = nodeDefinition.Match(line);
                         if (!nodeDefinitionMatch.Success)
                             continue;
-
+                        
                         var name = nodeDefinitionMatch.Groups[1].Value;
-                        var parent = nodeDefinitionMatch.Groups[2].Value;
-                        var firstParentElement = parent.Split('/')[0];
-                        var otherParentElements = parent.Substring(firstParentElement.Length);
                         var fieldName = ToFieldName(name);
-                        var path = tree[firstParentElement] + otherParentElements + "/" + name;
-                        tree[name] = path;
-
-                        if (path.Contains("EXAMPLE"))
-                            continue;
 
                         var type = string.Empty;
 
@@ -186,9 +181,25 @@ namespace GodotAnalysers
                             type = name;
                         }
 
-                        memberDeclarations.Add(ParseMemberDeclaration($"private {type} {fieldName};"));
+                        var parentHierarchyMatch = parentHierarchy.Match(line);
+                        if (parentHierarchyMatch.Success)
+                        {
+                            var parent = parentHierarchyMatch.Groups[1].Value;
+                            var firstParentElement = parent.Split('/')[0];
+                            var otherParentElements = parent.Substring(firstParentElement.Length);
+                            var path = tree[firstParentElement] + otherParentElements + "/" + name;
+                            tree[name] = path;
+                        }
+                        else
+                        {
+                            baseType = type;
+                        }
 
-                        memberDeclarationBuilder.AppendLine($"this.{fieldName} = this.GetNode<{type}>(\"{path}\");");
+                        if (tree.ContainsKey(name) && !tree[name].Contains("EXAMPLE"))
+                        {
+                            memberDeclarations.Add(ParseMemberDeclaration($"private {type} {fieldName};"));
+                            memberDeclarationBuilder.AppendLine($"this.{fieldName} = this.GetNode<{type}>(\"{tree[name]}\");");
+                        }
                     }
                 }
 
@@ -197,6 +208,10 @@ namespace GodotAnalysers
                 memberDeclarations.Add(ParseMemberDeclaration(memberDeclarationBuilder.ToString()));
 
                 node = node.AddMembers(memberDeclarations.ToArray());
+                if (!string.IsNullOrWhiteSpace(baseType))
+                {
+                    node = node.AddBaseListTypes(SimpleBaseType(IdentifierName(baseType)));
+                }
 
                 return base.VisitClassDeclaration(node);
             }
