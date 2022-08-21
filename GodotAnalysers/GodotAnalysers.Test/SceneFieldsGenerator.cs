@@ -24,10 +24,14 @@ public partial class C : RigidBody2D
 {
     private Sprite sprite;
     private CollisionShape2D collisionShape2D;
+    private CustomTextPopup customTextPopup;
+    private CustomTextPopup customTextPopup1;
     public void FillMembers()
     {
         this.sprite = this.GetNode<Sprite>(""./Sprite"");
         this.collisionShape2D = this.GetNode<CollisionShape2D>(""./CollisionShape2D"");
+        this.customTextPopup = this.GetNode<CustomTextPopup>(""./Sprite/CustomTextPopup"");
+        this.customTextPopup1 = this.GetNode<CustomTextPopup>(""./Sprite/CustomTextPopup1"");
     }
 }").SyntaxTrees.First().GetRoot().NormalizeWhitespace().ToFullString();
 

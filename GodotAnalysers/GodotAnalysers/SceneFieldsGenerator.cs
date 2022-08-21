@@ -127,10 +127,12 @@ namespace GodotAnalysers
 
         private class PartialClassContentGenerator : CSharpSyntaxRewriter
         {
+            private static Regex extResourceDefinition = new Regex("\\[ext_resource.*path=\"(.*?)\".*type=\"(.*?)\".*id=(.*?)]");
             private static Regex nodeDefinition = new Regex("\\[node.*name=\"(.*?)\".*]");
-            private static Regex builtInTypes = new Regex("type=\"(.*?)\""); 
+            private static Regex builtInTypes = new Regex("type=\"(.*?)\"");
             private static Regex parentHierarchy = new Regex("parent=\"(.*?)\"");
-            private static Regex instanceTypes = new Regex("instance=");
+            private static Regex instance = new Regex("instance="); 
+            private static Regex instanceExtResources = new Regex("instance=ExtResource\\((.*?)\\)");
 
             public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
             {
@@ -156,49 +158,72 @@ namespace GodotAnalysers
 
                 foreach (var member in members)
                 {
+                    var extresources = new Dictionary<string, Tuple<string, string>>();
+
                     var scenePath = Path.Combine(Path.GetDirectoryName(filePath), member);
                     var content = File.ReadLines(scenePath);
                     foreach (var line in content)
                     {
-                        var nodeDefinitionMatch = nodeDefinition.Match(line);
-                        if (!nodeDefinitionMatch.Success)
+                        var extResourceDefinitionMatch = extResourceDefinition.Match(line);
+                        if (extResourceDefinitionMatch.Success)
+                        {
+                            var resPath = extResourceDefinitionMatch.Groups[1].Value;
+                            var resType = extResourceDefinitionMatch.Groups[2].Value;
+                            var resId = extResourceDefinitionMatch.Groups[3].Value.Trim();
+
+                            extresources[resId] = new Tuple<string, string>(resPath, resType);
                             continue;
-                        
-                        var name = nodeDefinitionMatch.Groups[1].Value;
-                        var fieldName = ToFieldName(name);
-
-                        var type = string.Empty;
-
-                        var builtInTypesMatch = builtInTypes.Match(line);
-                        if (builtInTypesMatch.Success)
-                        {
-                            type = builtInTypesMatch.Groups[1].Value;
                         }
 
-                        var instanceTypesMatch = instanceTypes.Match(line);
-                        if (instanceTypesMatch.Success)
+                        var nodeDefinitionMatch = nodeDefinition.Match(line);
+                        if (nodeDefinitionMatch.Success)
                         {
-                            type = name;
-                        }
+                            var name = nodeDefinitionMatch.Groups[1].Value;
+                            var fieldName = ToFieldName(name);
 
-                        var parentHierarchyMatch = parentHierarchy.Match(line);
-                        if (parentHierarchyMatch.Success)
-                        {
-                            var parent = parentHierarchyMatch.Groups[1].Value;
-                            var firstParentElement = parent.Split('/')[0];
-                            var otherParentElements = parent.Substring(firstParentElement.Length);
-                            var path = tree[firstParentElement] + otherParentElements + "/" + name;
-                            tree[name] = path;
-                        }
-                        else
-                        {
-                            baseType = type;
-                        }
+                            var type = string.Empty;
 
-                        if (tree.ContainsKey(name) && !tree[name].Contains("EXAMPLE"))
-                        {
-                            memberDeclarations.Add(ParseMemberDeclaration($"private {type} {fieldName};"));
-                            memberDeclarationBuilder.AppendLine($"this.{fieldName} = this.GetNode<{type}>(\"{tree[name]}\");");
+                            var builtInTypesMatch = builtInTypes.Match(line);
+                            if (builtInTypesMatch.Success)
+                            {
+                                type = builtInTypesMatch.Groups[1].Value;
+                            }
+
+                            var instanceMatch = instance.Match(line);
+                            if (instanceMatch.Success)
+                            {
+                                type = name;
+                            }
+
+                            var instanceExtResourcesMatch = instanceExtResources.Match(line);
+                            if (instanceExtResourcesMatch.Success)
+                            {
+                                var resNum = instanceExtResources.Match(line);
+                                var pathToResource = extresources[resNum.Groups[1].Value.Trim()].Item1;
+                                type = Path.GetFileNameWithoutExtension(pathToResource);
+                            }
+
+                            var parentHierarchyMatch = parentHierarchy.Match(line);
+                            if (parentHierarchyMatch.Success)
+                            {
+                                var parent = parentHierarchyMatch.Groups[1].Value;
+                                var firstParentElement = parent.Split('/')[0];
+                                var otherParentElements = parent.Substring(firstParentElement.Length);
+                                var path = tree[firstParentElement] + otherParentElements + "/" + name;
+                                tree[name] = path;
+                            }
+                            else
+                            {
+                                baseType = type;
+                            }
+
+                            if (tree.ContainsKey(name) && !tree[name].Contains("EXAMPLE"))
+                            {
+                                memberDeclarations.Add(ParseMemberDeclaration($"private {type} {fieldName};"));
+                                memberDeclarationBuilder.AppendLine($"this.{fieldName} = this.GetNode<{type}>(\"{tree[name]}\");");
+                            }
+                            
+                            continue;
                         }
                     }
                 }
