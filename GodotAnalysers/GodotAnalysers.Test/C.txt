@@ -31,19 +31,11 @@ visible = false
 __meta__ = {
 "_editor_description_": ""
 }
-Text = "Developer: Artem Votintcev
-Design: Alexandra Votintceva 
-Game Images: Loading.io
-UI Images: Gameart2d.com
-Idea: Color lines 1998
+Text = ""
 
 [node name="CustomTextPopup1" parent="Sprite" instance=ExtResource( 3 )]
 visible = false
 __meta__ = {
 "_editor_description_": ""
 }
-Text = "Developer: Artem Votintcev
-Design: Alexandra Votintceva 
-Game Images: Loading.io
-UI Images: Gameart2d.com
-Idea: Color lines 1998
+Text = ""

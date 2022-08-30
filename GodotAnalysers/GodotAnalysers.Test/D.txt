@@ -1,0 +1,9 @@
+﻿[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Presentation/C.tscn" type="PackedScene" id=1]
+
+[node name="BaseNode" instance=ExtResource( 1 )]
+visible = false
+
+[node name="Sprite2" type="Sprite" parent="."]
+visible = true

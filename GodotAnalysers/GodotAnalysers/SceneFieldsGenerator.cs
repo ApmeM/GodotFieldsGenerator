@@ -131,7 +131,7 @@ namespace GodotAnalysers
             private static Regex nodeDefinition = new Regex("\\[node.*name=\"(.*?)\".*]");
             private static Regex builtInTypes = new Regex("type=\"(.*?)\"");
             private static Regex parentHierarchy = new Regex("parent=\"(.*?)\"");
-            private static Regex instance = new Regex("instance="); 
+            private static Regex instance = new Regex("instance=");
             private static Regex instanceExtResources = new Regex("instance=ExtResource\\((.*?)\\)");
 
             public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
@@ -152,7 +152,7 @@ namespace GodotAnalysers
                 var memberDeclarations = new List<MemberDeclarationSyntax>();
 
                 var memberDeclarationBuilder = new StringBuilder();
-                memberDeclarationBuilder.AppendLine("public void FillMembers() {");
+                memberDeclarationBuilder.AppendLine("protected virtual void FillMembers() {");
 
                 string baseType = null;
 
@@ -219,20 +219,19 @@ namespace GodotAnalysers
 
                             if (tree.ContainsKey(name) && !tree[name].Contains("EXAMPLE"))
                             {
-                                memberDeclarations.Add(ParseMemberDeclaration($"private {type} {fieldName};"));
+                                memberDeclarations.Add(ParseMemberDeclaration($"protected {type} {fieldName} {{ get; private set; }}"));
                                 memberDeclarationBuilder.AppendLine($"this.{fieldName} = this.GetNode<{type}>(\"{tree[name]}\");");
                             }
-                            
+
                             continue;
                         }
                     }
                 }
 
                 memberDeclarationBuilder.AppendLine("}");
-
                 memberDeclarations.Add(ParseMemberDeclaration(memberDeclarationBuilder.ToString()));
-
                 node = node.AddMembers(memberDeclarations.ToArray());
+
                 if (!string.IsNullOrWhiteSpace(baseType))
                 {
                     node = node.AddBaseListTypes(SimpleBaseType(IdentifierName(baseType)));
