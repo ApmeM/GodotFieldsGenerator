@@ -16,6 +16,8 @@ namespace GodotAnalysers
     [Generator]
     public class SceneFieldsGenerator : ISourceGenerator
     {
+        public IFileReader fileReader = new RealFileReader();
+
         private const string SceneReferenceAttributeName = nameof(SceneReferenceAttribute);
 
         public void Initialize(GeneratorInitializationContext context)
@@ -30,7 +32,7 @@ namespace GodotAnalysers
             foreach (var unit in receiver.Units)
             {
                 var name = Path.GetFileNameWithoutExtension(unit.SyntaxTree.FilePath) + $".Generated.cs";
-                var content = GetSourceContent(unit);
+                var content = GetSourceContent(unit, fileReader);
                 if (content != null)
                 {
                     context.AddSource(name, content.NormalizeWhitespace().ToString());
@@ -38,11 +40,11 @@ namespace GodotAnalysers
             }
         }
 
-        private static CompilationUnitSyntax GetSourceContent(CompilationUnitSyntax unit)
+        private static CompilationUnitSyntax GetSourceContent(CompilationUnitSyntax unit, IFileReader fileReader)
         {
             unit = (CompilationUnitSyntax)new AnnotationInitializer().Visit(unit);
             unit = (CompilationUnitSyntax)new PartialClassGenerator().Visit(unit);
-            unit = (CompilationUnitSyntax)new PartialClassContentGenerator().Visit(unit);
+            unit = (CompilationUnitSyntax)new PartialClassContentGenerator(fileReader).Visit(unit);
             if (unit.DescendantNodes().OfType<TypeDeclarationSyntax>().Any()) return unit;
             return null;
         }
@@ -133,6 +135,12 @@ namespace GodotAnalysers
             private static Regex parentHierarchy = new Regex("parent=\"(.*?)\"");
             private static Regex instance = new Regex("instance=");
             private static Regex instanceExtResources = new Regex("instance=ExtResource\\((.*?)\\)");
+            private IFileReader fileReader;
+
+            public PartialClassContentGenerator(IFileReader fileReader)
+            {
+                this.fileReader = fileReader;
+            }
 
             public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
             {
@@ -161,7 +169,7 @@ namespace GodotAnalysers
                     var extresources = new Dictionary<string, Tuple<string, string>>();
 
                     var scenePath = Path.Combine(Path.GetDirectoryName(filePath), member);
-                    var content = File.ReadLines(scenePath);
+                    var content = this.fileReader.ReadLines(scenePath);
                     foreach (var line in content)
                     {
                         var extResourceDefinitionMatch = extResourceDefinition.Match(line);
@@ -209,8 +217,14 @@ namespace GodotAnalysers
                                 var parent = parentHierarchyMatch.Groups[1].Value;
                                 var firstParentElement = parent.Split('/')[0];
                                 var otherParentElements = parent.Substring(firstParentElement.Length);
-                                var path = tree[firstParentElement] + otherParentElements + "/" + name;
-                                tree[name] = path;
+                                if (tree.ContainsKey(firstParentElement))
+                                {
+                                    tree[name] = tree[firstParentElement] + otherParentElements + "/" + name;
+                                }
+                                else
+                                {
+                                    tree[name] = "./" + parent + "/" + name;
+                                }
                             }
                             else
                             {
