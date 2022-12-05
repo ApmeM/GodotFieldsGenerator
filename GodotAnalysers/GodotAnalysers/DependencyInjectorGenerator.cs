@@ -51,43 +51,36 @@ namespace GodotAnalysers
             var sorted = SortDfs(data, data.ToDictionary(a => a, a => a.Parameters.Select(b => dict[b]).ToList())).SelectMany(a => a);
             var sb = new StringBuilder();
             sb.AppendLine("using System;");
-            sb.AppendLine("public static class DependencyInjector");
+            sb.AppendLine("namespace DependencyInjection");
             sb.AppendLine("{");
-            foreach (var def in sorted)
-            {
-                if (def.OnDemand)
-                {
-                    sb.AppendLine($"    public static readonly Func<{def.TypeFullName}> {def.TypeName.ToFieldName()};");
-                }
-                else
-                {
-                    sb.AppendLine($"    public static readonly {def.TypeFullName} {def.TypeName.ToFieldName()};");
-                }
-            }
-
-            sb.AppendLine("    static DependencyInjector()");
+            sb.AppendLine("    public static class DependencyInjector");
             sb.AppendLine("    {");
+            sb.AppendLine("         public static DependencyInjectorContext GlobalContext = new DependencyInjectorContext();");
+            sb.AppendLine("         public static DependencyInjectorContext GetNewContext()");
+            sb.AppendLine("         {");
+            sb.AppendLine("             return new DependencyInjectorContext(GlobalContext);");
+            sb.AppendLine("         }");
+            sb.AppendLine("    }");
+            sb.AppendLine("    public class DependencyInjectorContext");
+            sb.AppendLine("    {");
+            foreach (var def in sorted)
+            {
+                sb.AppendLine($"        public readonly {def.TypeFullName} {def.TypeName.ToFieldName()};");
+            }
+
+            sb.AppendLine("        public DependencyInjectorContext(DependencyInjectorContext copyContext = null)");
+            sb.AppendLine("        {");
 
             foreach (var def in sorted)
             {
-                if (def.OnDemand)
-                {
-                    sb.Append($"        {def.TypeName.ToFieldName()} = () => new {def.TypeFullName} (");
-                    sb.Append(string.Join(",", def.Parameters
-                        .Select(a => dict[a])
-                        .Select(a => a.TypeName.ToFieldName() + ((a.OnDemand) ? "()" : ""))));
-                    sb.AppendLine($");");
-                }
-                else
-                {
-                    sb.Append($"        {def.TypeName.ToFieldName()} = new {def.TypeFullName}(");
-                    sb.Append(string.Join(",", def.Parameters
-                        .Select(a => dict[a])
-                        .Select(a => a.TypeName.ToFieldName() + ((a.OnDemand) ? "()" : ""))));
-                    sb.AppendLine($");");
-                }
+                sb.Append($"            {def.TypeName.ToFieldName()} = " + ((def.OnDemand) ? "" : $"copyContext?.{def.TypeName.ToFieldName()} ?? " ) + $" new {def.TypeFullName} (");
+                sb.Append(string.Join(",", def.Parameters
+                    .Select(a => dict[a])
+                    .Select(a => a.TypeName.ToFieldName())));
+                sb.AppendLine($");");
             }
 
+            sb.AppendLine("        }");
             sb.AppendLine("    }");
             sb.AppendLine("}");
             return sb.ToString();

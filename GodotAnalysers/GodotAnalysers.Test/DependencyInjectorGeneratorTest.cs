@@ -17,15 +17,25 @@ namespace GodotAnalysers.Test
 public class C { }
 ",
 @"using System;
-
- public static class DependencyInjector
- {
-     public static readonly C c;
-     static DependencyInjector()
-     {
-         c = new C();
-     }
- }");
+namespace DependencyInjection
+{
+    public static class DependencyInjector
+    {
+        public static DependencyInjectorContext GlobalContext = new DependencyInjectorContext();
+        public static DependencyInjectorContext GetNewContext()
+        {
+            return new DependencyInjectorContext(GlobalContext);
+        }
+    }
+    public class DependencyInjectorContext
+    {
+        public readonly C c;
+        public DependencyInjectorContext(DependencyInjectorContext copyContext = null)
+        {
+            c = copyContext?.c ?? new C();
+        }
+    }
+}");
         }
 
         [Test]
@@ -43,17 +53,27 @@ public class C {
 }
 ",
 @"using System;
-
- public static class DependencyInjector
- {
-     public static readonly B b;
-     public static readonly C c;
-     static DependencyInjector()
-     {
-         b = new B();
-         c = new C(b);
-     }
- }");
+namespace DependencyInjection
+{
+    public static class DependencyInjector
+    {
+        public static DependencyInjectorContext GlobalContext = new DependencyInjectorContext();
+        public static DependencyInjectorContext GetNewContext()
+        {
+            return new DependencyInjectorContext(GlobalContext);
+        }
+    }
+    public class DependencyInjectorContext
+    {
+        public readonly B b;
+        public readonly C c;
+        public DependencyInjectorContext(DependencyInjectorContext copyContext = null)
+        {
+            b = copyContext?.b ?? new B();
+            c = copyContext?.c ?? new C(b);
+        }
+    }
+}");
         }
 
         [Test]
@@ -66,15 +86,25 @@ namespace Test{
 }
 ",
 @"using System;
-
- public static class DependencyInjector
- {
-     public static readonly Test.C c;
-     static DependencyInjector()
-     {
-         c = new Test.C();
-     }
- }");
+namespace DependencyInjection
+{
+    public static class DependencyInjector
+    {
+        public static DependencyInjectorContext GlobalContext = new DependencyInjectorContext();
+        public static DependencyInjectorContext GetNewContext()
+        {
+            return new DependencyInjectorContext(GlobalContext);
+        }
+    }
+    public class DependencyInjectorContext
+    {
+        public readonly Test.C c;
+        public DependencyInjectorContext(DependencyInjectorContext copyContext = null)
+        {
+            c = copyContext?.c ?? new Test.C();
+        }
+    }
+}");
         }
 
         [Test]
@@ -95,19 +125,29 @@ public class C {
 }
 ",
 @"using System;
-
- public static class DependencyInjector
- {
-     public static readonly Func<B> b;
-     public static readonly C c;
-     public static readonly Func<A> a;
-     static DependencyInjector()
-     {
-         b = () => new B();
-         c = new C(b());
-         a = () => new A(b(), c);
-     }
- }");
+namespace DependencyInjection
+{
+    public static class DependencyInjector
+    {
+        public static DependencyInjectorContext GlobalContext = new DependencyInjectorContext();
+        public static DependencyInjectorContext GetNewContext()
+        {
+            return new DependencyInjectorContext(GlobalContext);
+        }
+    }
+    public class DependencyInjectorContext
+    {
+        public readonly B b;
+        public readonly C c;
+        public readonly A a;
+        public DependencyInjectorContext(DependencyInjectorContext copyContext = null)
+        {
+            b = new B();
+            c = copyContext?.c ?? new C(b);
+            a = new A(b, c);
+        }
+    }
+}");
         }
 
         [Test]
@@ -137,22 +177,32 @@ public class D {
 
 ",
 @"using System;
+namespace DependencyInjection
+{
+    public static class DependencyInjector
+    {
+        public static DependencyInjectorContext GlobalContext = new DependencyInjectorContext();
+        public static DependencyInjectorContext GetNewContext()
+        {
+            return new DependencyInjectorContext(GlobalContext);
+        }
+    }
+    public class DependencyInjectorContext
+    {
+        public readonly D d;
+        public readonly B b;
+        public readonly C c;
+        public readonly A a;
 
- public static class DependencyInjector
- {
-     public static readonly D d;
-     public static readonly B b;
-     public static readonly C c;
-     public static readonly A a;
-
-     static DependencyInjector()
-     {
-         d = new D();
-         b = new B(d);
-         c = new C(b, d);
-         a = new A(b, c);
-     }
- }");
+        public DependencyInjectorContext(DependencyInjectorContext copyContext = null)
+        {
+            d = copyContext?.d ?? new D();
+            b = copyContext?.b ?? new B(d);
+            c = copyContext?.c ?? new C(b, d);
+            a = copyContext?.a ?? new A(b, c);
+        }
+    }
+}");
         }
 
         public void DoTest(string sourceText, string resultText)
