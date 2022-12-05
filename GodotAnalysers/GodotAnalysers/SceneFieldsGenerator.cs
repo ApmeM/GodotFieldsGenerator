@@ -187,7 +187,7 @@ namespace GodotAnalysers
                         if (nodeDefinitionMatch.Success)
                         {
                             var name = nodeDefinitionMatch.Groups[1].Value;
-                            var fieldName = ToFieldName(name);
+                            var fieldName = name.ToFieldName();
 
                             var type = string.Empty;
 
@@ -253,19 +253,6 @@ namespace GodotAnalysers
 
                 return base.VisitClassDeclaration(node);
             }
-
-            private string ToFieldName(string name)
-            {
-                return name[0].ToString().ToLower() + name.Substring(1);
-            }
-        }
-    }
-
-    public static class Ext
-    {
-        public static T CopyAnnotationsFrom<T>(this T node, SyntaxNode other) where T : SyntaxNode
-        {
-            return other.CopyAnnotationsTo(node);
         }
     }
 }

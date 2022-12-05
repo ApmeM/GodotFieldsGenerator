@@ -150,7 +150,8 @@ public partial class D : C
             // We can now assert things about the resulting compilation:
             Assert.IsTrue(diagnostics.IsEmpty); // there were no diagnostics created by the generators
             Assert.IsTrue(outputCompilation.SyntaxTrees.Count() == 2); // we have two syntax trees, the original 'user' provided one, and the one added by the generator
-            //Assert.IsTrue(outputCompilation.GetDiagnostics().IsEmpty); // verify the compilation with the added source has no diagnostics
+            // System.Console.WriteLine(string.Join("\n", outputCompilation.GetDiagnostics()));
+            // Assert.IsTrue(outputCompilation.GetDiagnostics().IsEmpty); // verify the compilation with the added source has no diagnostics
 
             // Or we can look at the results directly:
             GeneratorDriverRunResult runResult = driver.GetRunResult();
