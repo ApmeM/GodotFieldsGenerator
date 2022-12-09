@@ -1,8 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using NUnit.Framework;
-using System.Linq;
-using System.Reflection;
+﻿using NUnit.Framework;
 
 namespace GodotAnalysers.Test
 {
@@ -17,7 +13,7 @@ namespace GodotAnalysers.Test
 public class C { }
 ",
 @"using System;
-namespace DependencyInjection
+namespace GodotAnalysers
 {
     public static class DependencyInjector
     {
@@ -53,7 +49,7 @@ public class C {
 }
 ",
 @"using System;
-namespace DependencyInjection
+namespace GodotAnalysers
 {
     public static class DependencyInjector
     {
@@ -86,7 +82,7 @@ namespace Test{
 }
 ",
 @"using System;
-namespace DependencyInjection
+namespace GodotAnalysers
 {
     public static class DependencyInjector
     {
@@ -125,7 +121,7 @@ public class C {
 }
 ",
 @"using System;
-namespace DependencyInjection
+namespace GodotAnalysers
 {
     public static class DependencyInjector
     {
@@ -177,7 +173,7 @@ public class D {
 
 ",
 @"using System;
-namespace DependencyInjection
+namespace GodotAnalysers
 {
     public static class DependencyInjector
     {
@@ -205,50 +201,10 @@ namespace DependencyInjection
 }");
         }
 
-        public void DoTest(string sourceText, string resultText)
+        public static void DoTest(string sourceText, string resultText)
         {
-            var expectedResult = CreateCompilation(resultText).SyntaxTrees.First().GetRoot().NormalizeWhitespace().ToFullString();
-
-            Compilation compilation = CreateCompilation(sourceText);
-            var syntaxTree = compilation.SyntaxTrees.First();
-            compilation = compilation
-                .RemoveSyntaxTrees(syntaxTree)
-                .AddSyntaxTrees(compilation.SyntaxTrees.First().WithFilePath(Assembly.GetExecutingAssembly().Location));
-
             var generator = new DependencyInjectorGenerator();
-            GeneratorDriver driver = CSharpGeneratorDriver
-                .Create(generator)
-                .RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
-
-            System.Console.WriteLine(diagnostics.FirstOrDefault()?.ToString());
-
-            // We can now assert things about the resulting compilation:
-            Assert.IsTrue(diagnostics.IsEmpty); // there were no diagnostics created by the generators
-            Assert.AreEqual(2, outputCompilation.SyntaxTrees.Count()); // we have two syntax trees, the original 'user' provided one, and the one added by the generator
-            // System.Console.WriteLine(string.Join("\n", outputCompilation.GetDiagnostics()));
-            // Assert.IsTrue(outputCompilation.GetDiagnostics().IsEmpty); // verify the compilation with the added source has no diagnostics
-
-            // Or we can look at the results directly:
-            GeneratorDriverRunResult runResult = driver.GetRunResult();
-
-            // The runResult contains the combined results of all generators passed to the driver
-            Assert.AreEqual(1, runResult.GeneratedTrees.Length);
-            Assert.IsTrue(runResult.Diagnostics.IsEmpty);
-
-            // Or you can access the individual results on a by-generator basis
-            GeneratorRunResult generatorResult = runResult.Results[0];
-            Assert.IsTrue(generatorResult.Generator == generator);
-            Assert.IsTrue(generatorResult.Diagnostics.IsEmpty);
-            Assert.AreEqual(1, generatorResult.GeneratedSources.Length);
-            Assert.IsTrue(generatorResult.Exception is null);
-
-            Assert.AreEqual(expectedResult, generatorResult.GeneratedSources[0].SyntaxTree.GetRoot().NormalizeWhitespace().ToFullString());
+            TestHelper.DoTest(generator, sourceText, resultText);
         }
-
-        private static Compilation CreateCompilation(string source)
-          => CSharpCompilation.Create("compilation",
-              new[] { CSharpSyntaxTree.ParseText(source) },
-              new[] { MetadataReference.CreateFromFile(typeof(SceneReferenceAttribute).GetTypeInfo().Assembly.Location) },
-              new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
     }
 }
