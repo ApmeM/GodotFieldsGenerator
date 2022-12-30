@@ -6,6 +6,34 @@ namespace GodotAnalysers.Test
     public class SceneFieldsGeneratorTest : System.Object
     {
         [Test]
+        public void SimpleScene()
+        {
+                        DoTest(@"
+using GodotAnalysers;
+[SceneReference(""D.txt"")]
+public partial class D { }
+",
+
+@"D.txt",
+
+@"
+[gd_scene load_steps=5 format=2]
+[node name=""Sprite2"" type=""Sprite""]
+",
+
+@"using GodotAnalysers;
+
+public partial class D : Sprite
+{
+    protected DependencyInjectorContext di { get; private set; }
+    protected virtual void FillMembers()
+    {
+        this.di = DependencyInjector.GetNewContext();
+    }
+}");
+        }
+
+        [Test]
         public void NormalSceneTest()
         {
             DoTest(@"
@@ -126,6 +154,39 @@ public partial class D : C
     protected virtual void FillMembers()
     {
         this.sprite2 = this.GetNode<Sprite>(""./HUD/BottomButonsMargin/BottomButtonsContainer/Sprite2"");
+        this.di = DependencyInjector.GetNewContext();
+    }
+}");
+        }
+
+
+        [Test]
+        public void SceneTestWithInnerClass()
+        {
+                        DoTest(@"
+using GodotAnalysers;
+[SceneReference(""D.txt"")]
+public partial class D {
+    public class Inner{
+
+    }
+}
+",
+
+@"D.txt",
+
+@"
+[gd_scene load_steps=5 format=2]
+[node name=""Sprite2"" type=""Sprite""]
+",
+
+@"using GodotAnalysers;
+
+public partial class D : Sprite
+{
+    protected DependencyInjectorContext di { get; private set; }
+    protected virtual void FillMembers()
+    {
         this.di = DependencyInjector.GetNewContext();
     }
 }");

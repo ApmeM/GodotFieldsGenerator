@@ -21,9 +21,10 @@ namespace GodotAnalysers
                             a.Name.NormalizeWhitespace().ToFullString() + "Attribute" == SceneReferenceAttributeName)
                 .Select(a => ((LiteralExpressionSyntax)a.ArgumentList.Arguments.First().Expression).Token.ValueText)
                 .ToArray();
-
+            
+            var syntaxTree = node.SyntaxTree.FilePath; // For some reason after next line this Filepath become empty
             node = (ClassDeclarationSyntax)base.VisitClassDeclaration(node); // Pass ORIGINAL node
-            return node.WithAdditionalAnnotations(GetAnnotations(type, node.SyntaxTree.FilePath, members));
+            return node.WithAdditionalAnnotations(GetAnnotations(type, syntaxTree, members));
         }
 
         private static IEnumerable<SyntaxAnnotation> GetAnnotations(string type, string filePath, string[] members)

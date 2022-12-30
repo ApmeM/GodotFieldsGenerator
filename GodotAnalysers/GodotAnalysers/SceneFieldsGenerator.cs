@@ -3,10 +3,8 @@
 namespace GodotAnalysers
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Text;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -25,16 +23,12 @@ namespace GodotAnalysers
         {
             var receiver = (ExampleSyntaxReceiver)context.SyntaxReceiver ?? throw new Exception("SyntaxReceiver is null");
 
-            // var data = new DataList();
-
             foreach (var unit in receiver.Units)
             {
                 var unitSyntax = unit;
 
                 var name = Path.GetFileNameWithoutExtension(unitSyntax.SyntaxTree.FilePath) + $".Generated.cs";
-                // var model = context.Compilation.GetSemanticModel(unitSyntax.SyntaxTree);
 
-                // unitSyntax = (CompilationUnitSyntax)new InjectionInitializer(model, data).Visit(unitSyntax);
                 unitSyntax = (CompilationUnitSyntax)new AnnotationInitializer().Visit(unitSyntax);
                 unitSyntax = (CompilationUnitSyntax)new PartialClassGenerator().Visit(unitSyntax);
                 unitSyntax = (CompilationUnitSyntax)new PartialClassContentGenerator(fileReader).Visit(unitSyntax);
@@ -43,8 +37,6 @@ namespace GodotAnalysers
                     context.AddSource(name, unitSyntax.NormalizeWhitespace().ToString());
                 }
             }
-
-            // context.AddSource("DependencyInjector.Generated.cs", data.GetSourceContent());
         }
     }
 }
