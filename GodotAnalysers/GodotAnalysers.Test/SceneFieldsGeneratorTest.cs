@@ -192,6 +192,67 @@ public partial class D : Sprite
 }");
         }
 
+        [Test]
+        public void aa()
+        {
+                        DoTest(@"
+using GodotAnalysers;
+[SceneReference(""D.txt"")]
+public partial class D {
+}
+",
+
+@"D.txt",
+
+@"
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path=""res://Presentation/Construction.tscn"" type=""PackedScene"" id=1]
+[ext_resource path=""res://Presentation/ArtificialWell.cs"" type=""Script"" id=2]
+
+[sub_resource type=""Gradient"" id=1]
+colors = PoolColorArray( 1, 1, 1, 1, 0, 0.160784, 1, 1 )
+
+[sub_resource type=""GradientTexture"" id=2]
+gradient = SubResource( 1 )
+width = 8
+
+[node name=""ArtificialWell"" instance=ExtResource( 1 )]
+script = ExtResource( 2 )
+
+[node name=""Sprite"" parent=""."" index=""0""]
+scale = Vector2( 4, 16 )
+
+[node name=""Sprite1"" type=""Sprite"" parent=""Sprite"" index=""0""]
+visible = false
+scale = Vector2( 3, 2.625 )
+texture = SubResource( 2 )
+
+[node name=""Label1"" type=""Label"" parent=""Label"" index=""0""]
+margin_left = 20.0
+margin_top = 26.0
+margin_right = 60.0
+margin_bottom = 40.0
+
+",
+
+@"using GodotAnalysers;
+ 
+public partial class D : Construction
+{
+    protected Sprite sprite1 { get; private set; }
+    protected Label label1 { get; private set; }
+    protected DependencyInjectorContext di { get; private set; }
+    
+    protected virtual void FillMembers()
+    {
+        this.sprite1 = this.GetNode<Sprite>(""./Sprite/Sprite1"");
+        this.label1 = this.GetNode<Label>(""./Label/Label1"");
+        this.di = DependencyInjector.GetNewContext();
+    } 
+}");
+        }
+
         public static void DoTest(string sourceText, string fileName, string fileContent, string resultText)
         {
             var generator = new SceneFieldsGenerator();

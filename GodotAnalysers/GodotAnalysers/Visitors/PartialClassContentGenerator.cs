@@ -117,7 +117,7 @@ namespace GodotAnalysers
                             baseType = type;
                         }
 
-                        if (tree.ContainsKey(name) && !tree[name].Contains("EXAMPLE"))
+                        if (!string.IsNullOrWhiteSpace(type) && tree.ContainsKey(name) && !tree[name].Contains("EXAMPLE"))
                         {
                             memberDeclarations.Add(ParseMemberDeclaration($"protected {type} {fieldName} {{ get; private set; }}"));
                             memberDeclarationBuilder.AppendLine($"this.{fieldName} = this.GetNode<{type}>(\"{tree[name]}\");");

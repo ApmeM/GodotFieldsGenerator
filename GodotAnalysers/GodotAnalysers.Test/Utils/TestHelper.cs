@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -46,6 +47,7 @@ public static class TestHelper
 
         for(var i = 0; i < expectedResults.Count; i++)
         {
+            Console.WriteLine(generatorResult.GeneratedSources[i].SyntaxTree.GetRoot().NormalizeWhitespace().ToFullString());
             Assert.AreEqual(expectedResults[i], generatorResult.GeneratedSources[i].SyntaxTree.GetRoot().NormalizeWhitespace().ToFullString());
         }
     }
