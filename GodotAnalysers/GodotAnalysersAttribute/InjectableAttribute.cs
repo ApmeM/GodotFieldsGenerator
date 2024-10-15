@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GodotAnalysers
+namespace Godot
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class InjectableAttribute : Attribute

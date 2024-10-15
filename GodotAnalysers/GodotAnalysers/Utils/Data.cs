@@ -1,6 +1,6 @@
 #pragma warning disable RS2008 // Enable analyzer release tracking
 
-namespace GodotAnalysers
+namespace Godot
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -16,7 +16,7 @@ namespace GodotAnalysers
             var sorted = DfsSort.SortDfs(data, data.ToDictionary(a => a, a => a.Parameters.Select(b => dict[b]).ToList())).SelectMany(a => a);
             var sb = new StringBuilder();
             sb.AppendLine("using System;");
-            sb.AppendLine("namespace GodotAnalysers");
+            sb.AppendLine("namespace Godot");
             sb.AppendLine("{");
             sb.AppendLine("    public static class DependencyInjector");
             sb.AppendLine("    {");

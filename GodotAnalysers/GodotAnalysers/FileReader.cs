@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace GodotAnalysers
+namespace Godot
 {
     public interface IFileReader
     {

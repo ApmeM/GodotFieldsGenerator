@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GodotAnalysers
+namespace Godot
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class SceneReferenceAttribute : Attribute

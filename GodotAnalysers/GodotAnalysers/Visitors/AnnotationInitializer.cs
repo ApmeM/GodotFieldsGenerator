@@ -1,6 +1,6 @@
 #pragma warning disable RS2008 // Enable analyzer release tracking
 
-namespace GodotAnalysers
+namespace Godot
 {
     using System.Collections.Generic;
     using System.Linq;

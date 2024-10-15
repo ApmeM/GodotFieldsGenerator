@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace GodotAnalysers.Test
+namespace Godot.Test
 {
     [TestFixture]
     public class SceneFieldsGeneratorTest : System.Object
@@ -9,7 +9,7 @@ namespace GodotAnalysers.Test
         public void SimpleScene()
         {
                         DoTest(@"
-using GodotAnalysers;
+using Godot;
 [SceneReference(""D.txt"")]
 public partial class D { }
 ",
@@ -21,7 +21,7 @@ public partial class D { }
 [node name=""Sprite2"" type=""Sprite""]
 ",
 
-@"using GodotAnalysers;
+@"using Godot;
 
 public partial class D : Sprite
 {
@@ -37,7 +37,7 @@ public partial class D : Sprite
         public void NormalSceneTest()
         {
             DoTest(@"
-using GodotAnalysers;
+using Godot;
 [SceneReference(""C.txt"")]
 public partial class C { }
 ",
@@ -75,7 +75,7 @@ __meta__ = {
 ""_editor_description_"": """"
 }
 Text = """,
-@"using GodotAnalysers;
+@"using Godot;
 
 public partial class C : RigidBody2D
 {
@@ -99,7 +99,7 @@ public partial class C : RigidBody2D
         public void InheritedSceneTest()
         {
             DoTest(@"
-using GodotAnalysers;
+using Godot;
 [SceneReference(""D.txt"")]
 public partial class D { }
 ",
@@ -113,7 +113,7 @@ public partial class D { }
 [node name=""Sprite2"" type=""Sprite"" parent="".""]
 ",
 
-@"using GodotAnalysers;
+@"using Godot;
 
 public partial class D : C
 {
@@ -131,7 +131,7 @@ public partial class D : C
         public void ModifiedInheritedSceneTest()
         {
             DoTest(@"
-using GodotAnalysers;
+using Godot;
 [SceneReference(""D.txt"")]
 public partial class D { }
 ",
@@ -145,7 +145,7 @@ public partial class D { }
 [node name=""Sprite2"" type=""Sprite"" parent=""HUD/BottomButonsMargin/BottomButtonsContainer""]
 ",
 
-@"using GodotAnalysers;
+@"using Godot;
 
 public partial class D : C
 {
@@ -164,7 +164,7 @@ public partial class D : C
         public void SceneTestWithInnerClass()
         {
                         DoTest(@"
-using GodotAnalysers;
+using Godot;
 [SceneReference(""D.txt"")]
 public partial class D {
     public class Inner{
@@ -180,7 +180,7 @@ public partial class D {
 [node name=""Sprite2"" type=""Sprite""]
 ",
 
-@"using GodotAnalysers;
+@"using Godot;
 
 public partial class D : Sprite
 {
@@ -193,10 +193,10 @@ public partial class D : Sprite
         }
 
         [Test]
-        public void aa()
+        public void DoNotCreatePropertyIfTypeNotFound()
         {
                         DoTest(@"
-using GodotAnalysers;
+using Godot;
 [SceneReference(""D.txt"")]
 public partial class D {
 }
@@ -236,7 +236,7 @@ margin_bottom = 40.0
 
 ",
 
-@"using GodotAnalysers;
+@"using Godot;
  
 public partial class D : Construction
 {
@@ -250,6 +250,51 @@ public partial class D : Construction
         this.label1 = this.GetNode<Label>(""./Label/Label1"");
         this.di = DependencyInjector.GetNewContext();
     } 
+}");
+        }
+        [Test]
+        public void InheritedSceneFixed()
+        {
+                        DoTest(@"
+using Godot;
+[SceneReference(""Level1.cs"")]
+public partial class Level1 {
+
+    public override void _Ready()
+    {
+        base._Ready();
+        this.FillMembers();        
+    }
+}
+",
+
+@"Level1.cs",
+
+@"
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path=""res://Presentation/BaseLevel.tscn"" type=""PackedScene"" id=1]
+[ext_resource path=""res://Presentation/Level1.cs"" type=""Script"" id=2]
+
+[node name=""Level1"" instance=ExtResource( 1 )]
+script = ExtResource( 2 )
+
+[node name=""Map"" parent=""."" index=""0""]
+tile_data = PoolIntArray( 262146, 0, 4, 262147, 0, 4, 262148, 0, 4, 262149, 0, 4, 262150, 0, 4, 327681, 0, 4, 327682, 0, 4, 327683, 0, 13, 327684, 0, 13, 327685, 0, 13, 327686, 0, 4, 327687, 0, 4, 393217, 0, 4, 393218, 0, 13, 393219, 0, 13, 393220, 0, 13, 393221, 0, 13, 393222, 0, 13, 393223, 0, 4, 458753, 0, 4, 458754, 0, 13, 458755, 0, 7, 458756, 0, 13, 458757, 0, 13, 458758, 0, 13, 458759, 0, 4, 524289, 0, 4, 524290, 0, 13, 524291, 0, 13, 524292, 0, 13, 524293, 0, 13, 524294, 0, 13, 524295, 0, 4, 589825, 0, 4, 589826, 0, 4, 589827, 0, 13, 589828, 0, 13, 589829, 0, 13, 589830, 0, 13, 589831, 0, 4, 655362, 0, 4, 655363, 0, 13, 655364, 0, 13, 655365, 0, 13, 655366, 0, 13, 655367, 0, 4, 720898, 0, 4, 720899, 0, 4, 720900, 0, 13, 720901, 0, 13, 720902, 0, 4, 720903, 0, 4, 786436, 0, 4, 786437, 0, 4, 786438, 0, 4 )
+
+",
+
+@"using Godot;
+ 
+public partial class Level1 : BaseLevel
+{
+    protected DependencyInjectorContext di { get; private set; }
+    
+    protected virtual void FillMembers()
+    {
+        this.di = DependencyInjector.GetNewContext();
+    } 
+    
 }");
         }
 

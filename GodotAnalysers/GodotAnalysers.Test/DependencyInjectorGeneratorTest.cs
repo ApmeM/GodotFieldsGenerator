@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace GodotAnalysers.Test
+namespace Godot.Test
 {
     [TestFixture]
     public class DependencyInjectorGeneratorTest : System.Object
@@ -13,7 +13,7 @@ namespace GodotAnalysers.Test
 public class C { }
 ",
 @"using System;
-namespace GodotAnalysers
+namespace Godot
 {
     public static class DependencyInjector
     {
@@ -49,7 +49,7 @@ public class C {
 }
 ",
 @"using System;
-namespace GodotAnalysers
+namespace Godot
 {
     public static class DependencyInjector
     {
@@ -82,7 +82,7 @@ namespace Test{
 }
 ",
 @"using System;
-namespace GodotAnalysers
+namespace Godot
 {
     public static class DependencyInjector
     {
@@ -121,7 +121,7 @@ public class C {
 }
 ",
 @"using System;
-namespace GodotAnalysers
+namespace Godot
 {
     public static class DependencyInjector
     {
@@ -173,7 +173,7 @@ public class D {
 
 ",
 @"using System;
-namespace GodotAnalysers
+namespace Godot
 {
     public static class DependencyInjector
     {
