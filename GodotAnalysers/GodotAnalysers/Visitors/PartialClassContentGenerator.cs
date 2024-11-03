@@ -116,11 +116,13 @@ namespace Godot
                         {
                             baseType = type;
                         }
+string s = null;
 
                         if (!string.IsNullOrWhiteSpace(type) && tree.ContainsKey(name) && !tree[name].Contains("EXAMPLE"))
                         {
-                            memberDeclarations.Add(ParseMemberDeclaration($"protected {type} {fieldName} {{ get; private set; }}"));
-                            memberDeclarationBuilder.AppendLine($"this.{fieldName} = this.GetNode<{type}>(\"{tree[name]}\");");
+                            memberDeclarations.Add(ParseMemberDeclaration($"private {type} {fieldName}_inner_field;"));
+                            memberDeclarations.Add(ParseMemberDeclaration($"protected {type} {fieldName} {{ get {{ \n this.{fieldName}_inner_field = this.{fieldName}_inner_field ?? this.GetNode<{type}>(\"{tree[name]}\"); return this.{fieldName}_inner_field; }} \n }}"));
+                            memberDeclarationBuilder.AppendLine($"this.{fieldName}_inner_field = this.GetNode<{type}>(\"{tree[name]}\");");
                         }
 
                         continue;

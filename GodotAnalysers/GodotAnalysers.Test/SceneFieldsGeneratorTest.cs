@@ -75,24 +75,65 @@ __meta__ = {
 ""_editor_description_"": """"
 }
 Text = """,
-@"using Godot;
-
-public partial class C : RigidBody2D
-{
-    protected Sprite sprite { get; private set; }
-    protected CollisionShape2D collisionShape2D { get; private set; }
-    protected CustomTextPopup customTextPopup { get; private set; }
-    protected CustomTextPopup customTextPopup1 { get; private set; }
-    protected DependencyInjectorContext di { get; private set; }
-    protected virtual void FillMembers()
-    {
-        this.sprite = this.GetNode<Sprite>(""./Sprite"");
-        this.collisionShape2D = this.GetNode<CollisionShape2D>(""./CollisionShape2D"");
-        this.customTextPopup = this.GetNode<CustomTextPopup>(""./Sprite/CustomTextPopup"");
-        this.customTextPopup1 = this.GetNode<CustomTextPopup>(""./Sprite/CustomTextPopup1"");
-        this.di = DependencyInjector.GetNewContext();
-    }
-}");
+@" using Godot;
+ 
+ public partial class C : RigidBody2D
+ {
+     private Sprite sprite_inner_field;
+     protected Sprite sprite
+     {
+         get
+         {
+             this.sprite_inner_field = this.sprite_inner_field ?? this.GetNode<Sprite>(""./Sprite"");
+             return this.sprite_inner_field;
+         }
+     }
+ 
+     private CollisionShape2D collisionShape2D_inner_field;
+     protected CollisionShape2D collisionShape2D
+     {
+         get
+         {
+             this.collisionShape2D_inner_field = this.collisionShape2D_inner_field ?? this.GetNode<CollisionShape2D>(""./CollisionShape2D"");
+             return this.collisionShape2D_inner_field;
+         }
+     }
+ 
+     private CustomTextPopup customTextPopup_inner_field;
+     protected CustomTextPopup customTextPopup
+     {
+         get
+         {
+             this.customTextPopup_inner_field = this.customTextPopup_inner_field ?? this.GetNode<CustomTextPopup>(""./Sprite/CustomTextPopup"");
+             return this.customTextPopup_inner_field;
+         }
+     }
+ 
+     private CustomTextPopup customTextPopup1_inner_field;
+     protected CustomTextPopup customTextPopup1
+     {
+         get
+         {
+             this.customTextPopup1_inner_field = this.customTextPopup1_inner_field ?? this.GetNode<CustomTextPopup>(""./Sprite/CustomTextPopup1"");
+             return this.customTextPopup1_inner_field;
+         }
+     }
+ 
+     protected DependencyInjectorContext di
+     {
+         get;
+         private set;
+     }
+ 
+     protected virtual void FillMembers()
+     {
+         this.sprite_inner_field = this.GetNode<Sprite>(""./Sprite"");
+         this.collisionShape2D_inner_field = this.GetNode<CollisionShape2D>(""./CollisionShape2D"");
+         this.customTextPopup_inner_field = this.GetNode<CustomTextPopup>(""./Sprite/CustomTextPopup"");
+         this.customTextPopup1_inner_field = this.GetNode<CustomTextPopup>(""./Sprite/CustomTextPopup1"");
+         this.di = DependencyInjector.GetNewContext();
+     }
+ }");
         }
 
         [Test]
@@ -114,17 +155,31 @@ public partial class D { }
 ",
 
 @"using Godot;
-
-public partial class D : C
-{
-    protected Sprite sprite2 { get; private set; }
-    protected DependencyInjectorContext di { get; private set; }
-    protected virtual void FillMembers()
-    {
-        this.sprite2 = this.GetNode<Sprite>(""./Sprite2"");
-        this.di = DependencyInjector.GetNewContext();
-    }
-}");
+ 
+ public partial class D : C
+ {
+     private Sprite sprite2_inner_field;
+     protected Sprite sprite2
+     {
+         get
+         {
+             this.sprite2_inner_field = this.sprite2_inner_field ?? this.GetNode<Sprite>(""./Sprite2"");
+             return this.sprite2_inner_field;
+         }
+     }
+ 
+     protected DependencyInjectorContext di
+     {
+         get;
+         private set;
+     }
+ 
+     protected virtual void FillMembers()
+     {
+         this.sprite2_inner_field = this.GetNode<Sprite>(""./Sprite2"");
+         this.di = DependencyInjector.GetNewContext();
+     }
+ }");
         }
 
         [Test]
@@ -146,17 +201,31 @@ public partial class D { }
 ",
 
 @"using Godot;
-
-public partial class D : C
-{
-    protected Sprite sprite2 { get; private set; }
-    protected DependencyInjectorContext di { get; private set; }
-    protected virtual void FillMembers()
-    {
-        this.sprite2 = this.GetNode<Sprite>(""./HUD/BottomButonsMargin/BottomButtonsContainer/Sprite2"");
-        this.di = DependencyInjector.GetNewContext();
-    }
-}");
+ 
+ public partial class D : C
+ {
+     private Sprite sprite2_inner_field;
+     protected Sprite sprite2
+     {
+         get
+         {
+             this.sprite2_inner_field = this.sprite2_inner_field ?? this.GetNode<Sprite>(""./HUD/BottomButonsMargin/BottomButtonsContainer/Sprite2"");
+             return this.sprite2_inner_field;
+         }
+     }
+ 
+     protected DependencyInjectorContext di
+     {
+         get;
+         private set;
+     }
+ 
+     protected virtual void FillMembers()
+     {
+         this.sprite2_inner_field = this.GetNode<Sprite>(""./HUD/BottomButonsMargin/BottomButtonsContainer/Sprite2"");
+         this.di = DependencyInjector.GetNewContext();
+     }
+ }");
         }
 
 
@@ -238,19 +307,41 @@ margin_bottom = 40.0
 
 @"using Godot;
  
-public partial class D : Construction
-{
-    protected Sprite sprite1 { get; private set; }
-    protected Label label1 { get; private set; }
-    protected DependencyInjectorContext di { get; private set; }
-    
-    protected virtual void FillMembers()
-    {
-        this.sprite1 = this.GetNode<Sprite>(""./Sprite/Sprite1"");
-        this.label1 = this.GetNode<Label>(""./Label/Label1"");
-        this.di = DependencyInjector.GetNewContext();
-    } 
-}");
+ public partial class D : Construction
+ {
+     private Sprite sprite1_inner_field;
+     protected Sprite sprite1
+     {
+         get
+         {
+             this.sprite1_inner_field = this.sprite1_inner_field ?? this.GetNode<Sprite>(""./Sprite/Sprite1"");
+             return this.sprite1_inner_field;
+         }
+     }
+ 
+     private Label label1_inner_field;
+     protected Label label1
+     {
+         get
+         {
+             this.label1_inner_field = this.label1_inner_field ?? this.GetNode<Label>(""./Label/Label1"");
+             return this.label1_inner_field;
+         }
+     }
+ 
+     protected DependencyInjectorContext di
+     {
+         get;
+         private set;
+     }
+ 
+     protected virtual void FillMembers()
+     {
+         this.sprite1_inner_field = this.GetNode<Sprite>(""./Sprite/Sprite1"");
+         this.label1_inner_field = this.GetNode<Label>(""./Label/Label1"");
+         this.di = DependencyInjector.GetNewContext();
+     }
+ }");
         }
         [Test]
         public void InheritedSceneFixed()
