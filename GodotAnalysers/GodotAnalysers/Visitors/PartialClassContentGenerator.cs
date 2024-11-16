@@ -16,6 +16,7 @@ namespace Godot
     public class PartialClassContentGenerator : CSharpSyntaxRewriter
     {
         private static Regex extResourceDefinition = new Regex("\\[ext_resource.*path=\"(.*?)\".*type=\"(.*?)\".*id=(.*?)]");
+        private static Regex extResourceAltDefinition = new Regex("\\[ext_resource.*type=\"(.*?)\".*path=\"(.*?)\".*id=(.*?)]");
         private static Regex nodeDefinition = new Regex("\\[node.*name=\"(.*?)\".*]");
         private static Regex builtInTypes = new Regex("type=\"(.*?)\"");
         private static Regex parentHierarchy = new Regex("parent=\"(.*?)\"");
@@ -64,6 +65,17 @@ namespace Godot
                         var resPath = extResourceDefinitionMatch.Groups[1].Value;
                         var resType = extResourceDefinitionMatch.Groups[2].Value;
                         var resId = extResourceDefinitionMatch.Groups[3].Value.Trim();
+
+                        extresources[resId] = new Tuple<string, string>(resPath, resType);
+                        continue;
+                    }
+
+                    var extResourceAltDefinitionMatch = extResourceAltDefinition.Match(line);
+                    if (extResourceAltDefinitionMatch.Success)
+                    {
+                        var resType = extResourceAltDefinitionMatch.Groups[1].Value;
+                        var resPath = extResourceAltDefinitionMatch.Groups[2].Value;
+                        var resId = extResourceAltDefinitionMatch.Groups[3].Value.Trim();
 
                         extresources[resId] = new Tuple<string, string>(resPath, resType);
                         continue;

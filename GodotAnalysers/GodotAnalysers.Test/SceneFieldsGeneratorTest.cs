@@ -228,6 +228,52 @@ public partial class D { }
  }");
         }
 
+        [Test]
+        public void DifferentOrderForExtResource()
+        {
+            DoTest(@"
+using Godot;
+[SceneReference(""D.txt"")]
+public partial class D { }
+",
+
+@"D.txt",
+
+@"
+[gd_scene load_steps=3 format=2]
+[ext_resource type=""PackedScene"" path=""res://Presentation/C.tscn"" id=1]
+[node name=""BaseNode"" instance=ExtResource( 1 )]
+[node name=""Sprite2"" type=""Sprite"" parent=""HUD/BottomButonsMargin/BottomButtonsContainer""]
+",
+
+@"using Godot;
+ 
+ public partial class D : C
+ {
+     private Sprite sprite2_inner_field;
+     protected Sprite sprite2
+     {
+         get
+         {
+             this.sprite2_inner_field = this.sprite2_inner_field ?? this.GetNode<Sprite>(""./HUD/BottomButonsMargin/BottomButtonsContainer/Sprite2"");
+             return this.sprite2_inner_field;
+         }
+     }
+ 
+     protected DependencyInjectorContext di
+     {
+         get;
+         private set;
+     }
+ 
+     protected virtual void FillMembers()
+     {
+         this.sprite2_inner_field = this.GetNode<Sprite>(""./HUD/BottomButonsMargin/BottomButtonsContainer/Sprite2"");
+         this.di = DependencyInjector.GetNewContext();
+     }
+ }");
+        }
+
 
         [Test]
         public void SceneTestWithInnerClass()
@@ -343,6 +389,7 @@ margin_bottom = 40.0
      }
  }");
         }
+
         [Test]
         public void InheritedSceneFixed()
         {
@@ -388,7 +435,7 @@ public partial class Level1 : BaseLevel
     
 }");
         }
-
+        
         public static void DoTest(string sourceText, string fileName, string fileContent, string resultText)
         {
             var generator = new SceneFieldsGenerator();
